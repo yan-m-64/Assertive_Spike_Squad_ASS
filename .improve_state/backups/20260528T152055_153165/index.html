@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assertive Spike Squad — Beach Volleyball Arcade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="game-wrapper">
+
+    <canvas id="game-canvas" role="img" aria-label="Beach volleyball game court"></canvas>
+
+    <div id="score-display" aria-live="polite" aria-atomic="true" role="status">
+      <div class="score-team" id="score-player-team">
+        <span class="team-name" id="player-team-name">SPIKE SQUAD</span>
+        <span class="score-val" id="player-score">0</span>
+      </div>
+      <div class="score-center">
+        <span id="serving-indicator" class="serving-chevron" aria-label="Serving indicator"></span>
+        <span class="score-sep">:</span>
+        <span id="set-info" class="set-label">BEACH VOLLEY</span>
+      </div>
+      <div class="score-team score-team-right" id="score-ai-team">
+        <span class="score-val" id="ai-score">0</span>
+        <span class="team-name" id="ai-team-name">NEON ACES</span>
+      </div>
+    </div>
+
+    <div id="hit-display" aria-live="polite" aria-atomic="true" role="status">
+      <span id="hit-label">HITS</span>
+      <span id="hit-dots">
+        <span class="hit-dot" id="hit-1"></span>
+        <span class="hit-dot" id="hit-2"></span>
+        <span class="hit-dot" id="hit-3"></span>
+      </span>
+    </div>
+
+    <div id="start-btn" role="dialog" aria-modal="true" aria-labelledby="game-title">
+      <div class="start-inner">
+        <div class="title-block">
+          <div class="title-line-1" id="game-title">ASSERTIVE</div>
+          <div class="title-line-2">SPIKE</div>
+          <div class="title-line-3">SQUAD</div>
+        </div>
+
+        <div class="mode-selector" role="group" aria-label="Game mode">
+          <button class="mode-btn active" id="mode-14" aria-pressed="true" data-points="14">
+            14 PTS<br/><span class="mode-sub">QUICK</span>
+          </button>
+          <button class="mode-btn" id="mode-21" aria-pressed="false" data-points="21">
+            21 PTS<br/><span class="mode-sub">FULL</span>
+          </button>
+        </div>
+
+        <div class="controls-hint">
+          <div class="hint-row"><kbd>&#8592;</kbd><kbd>&#8594;</kbd> MOVE &nbsp; <kbd>SPACE</kbd> JUMP</div>
+          <div class="hint-row">WASD also supported</div>
+        </div>
+
+        <button id="serve-btn" class="serve-button" aria-label="Start game and serve">SERVE</button>
+      </div>
+    </div>
+
+    <div id="game-over-screen" class="hidden" role="dialog" aria-modal="true" aria-labelledby="winner-banner">
+      <div class="gameover-card">
+        <div id="winner-banner" class="winner-banner">YOU WIN!</div>
+        <div class="final-score-block">
+          <span id="final-score-player" class="final-val">0</span>
+          <span class="final-sep">&#8211;</span>
+          <span id="final-score-ai" class="final-val">0</span>
+        </div>
+        <div id="streak-display" class="streak-text"></div>
+        <button id="play-again-btn" class="play-again-button" aria-label="Play again">PLAY AGAIN</button>
+      </div>
+    </div>
+
+    <div id="touch-controls" aria-label="Touch controls" role="group">
+      <div id="dpad-left" class="touch-zone">
+        <button class="dpad-btn" id="btn-left" aria-label="Move left" data-action="left">&#9664;</button>
+        <button class="dpad-btn" id="btn-right" aria-label="Move right" data-action="right">&#9654;</button>
+      </div>
+      <div id="dpad-right" class="touch-zone">
+        <button class="dpad-btn jump-btn" id="btn-jump" aria-label="Jump" data-action="jump">&#9650;</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
