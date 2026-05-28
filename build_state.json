@@ -1,0 +1,58 @@
+{
+  "app_name": "Assertive_Spike_Squad_ASS",
+  "description": "A volleyball game taking place at a beach of a retro / neon city. Single player game where you play as a part of team of 4 vs another team of 4. Game has selection for a quick game of 14 points or longer of 21. Follows standard rules of volleyball, 3 hits max per team, same person can’t hit twice in a row.",
+  "complexity": "advanced",
+  "updates": "normal",
+  "template": "arcade-game",
+  "style_preset": "",
+  "style_intensity": "",
+  "variation": "",
+  "asset_mode": "",
+  "game_assets": "",
+  "kenney_assets": {},
+  "vault_notes_used": [
+    "/Users/agent/claude-obsidian/wiki/systems/telegram-agent/Obsidian Knowledge Standard.md",
+    "/Users/agent/claude-obsidian/wiki/projects/generated-apps/neon-counter.md",
+    "/Users/agent/claude-obsidian/wiki/projects/generated-apps/dungeon-coin-run.md",
+    "/Users/agent/claude-obsidian/wiki/projects/generated-apps/icon-counter.md",
+    "/Users/agent/claude-obsidian/wiki/research/world-class-performer-analysis.md",
+    "libraries/Creative Reference Profile.md",
+    "libraries/Style Presets.md",
+    "libraries/UI Pattern Library.md"
+  ],
+  "asset_library_references": [
+    "Asset Library Index.md"
+  ],
+  "ui_pattern_references": [
+    "UI Pattern Library.md"
+  ],
+  "publish_preference": null,
+  "status": "complete",
+  "completed_stages": [
+    "plan",
+    "html",
+    "css",
+    "js",
+    "readme"
+  ],
+  "current_stage": null,
+  "files_created": [
+    "plan.md",
+    "index.html",
+    "style.css",
+    "app.js",
+    "README.md"
+  ],
+  "last_error": null,
+  "validation_status": "pass",
+  "browser_verification_status": "pass",
+  "quality_status": "pass",
+  "created_at": "2026-05-27T00:37:22Z",
+  "updated_at": "2026-05-28T11:02:42Z",
+  "stage_retry_counts": {
+    "js": 1
+  },
+  "simplified_stages": [
+    "js"
+  ]
+}

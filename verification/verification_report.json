@@ -1,0 +1,20 @@
+{
+  "app_name": "Assertive_Spike_Squad_ASS",
+  "timestamp": "2026-05-28T11:02:36Z",
+  "result": "PASS",
+  "page_loaded": true,
+  "title": "Assertive Spike Squad — Beach Volleyball Arcade",
+  "title_exists": true,
+  "console_errors": [],
+  "console_error_count": 0,
+  "page_errors": [],
+  "page_error_count": 0,
+  "start_button_clicked": true,
+  "post_click_console_errors": [],
+  "post_click_page_errors": [],
+  "desktop_screenshot": "/Users/agent/claude-agents/projects/Assertive_Spike_Squad_ASS/verification/desktop.png",
+  "mobile_screenshot": "/Users/agent/claude-agents/projects/Assertive_Spike_Squad_ASS/verification/mobile.png",
+  "screenshot_path": "/Users/agent/claude-agents/projects/Assertive_Spike_Squad_ASS/verification/desktop.png",
+  "warnings": [],
+  "smoke_issues": []
+}
