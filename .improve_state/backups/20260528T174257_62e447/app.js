@@ -3,18 +3,11 @@ const ctx = canvas.getContext('2d');
 canvas.width = 800; canvas.height = 450;
 
 const GND = 390, NX = 400, NT = 268, BR = 12, PW = 28, PH = 46;
-let state = 'idle', mode = 14, difficulty = 'normal', ps = 0, as = 0, keys = {};
+let state = 'idle', mode = 14, ps = 0, as = 0, keys = {};
 let ball, player, tms, ais, rally, hitLock;
 let serveTeam = 'player', serveTimer = 0;
 let faultMsg = null, pointFlash = null;
 let particles = [];
-
-// AI tuning per difficulty — higher difficulty = faster, more reactive opponents
-const DIFF = {
-  easy:   { spd: 1.4, range: 35, jumpVy: -11 },
-  normal: { spd: 2.2, range: 55, jumpVy: -12 },
-  hard:   { spd: 3.6, range: 78, jumpVy: -13 }
-};
 
 const mkP = (x, id) => ({ x, y: GND - PH, vy: 0, g: true, id });
 
@@ -22,6 +15,7 @@ function initServeReady(srv) {
   serveTeam = srv;
   serveTimer = srv === 'ai' ? 90 : 0;
   state = 'serve-ready';
+  // Clear held keys so a held SPACE doesn't instantly fire the serve
   keys.Space = false; keys.ArrowUp = false; keys.KeyW = false;
   rally = { hits: 0, last: null, side: srv };
   player = mkP(160, 'p');
@@ -58,7 +52,7 @@ function updateHitLabel() {
 function triggerScorePop(id) {
   const el = document.getElementById(id);
   el.classList.remove('pop');
-  void el.offsetWidth;
+  void el.offsetWidth; // force reflow to restart animation
   el.classList.add('pop');
   setTimeout(() => el.classList.remove('pop'), 400);
 }
@@ -133,21 +127,18 @@ function tryHit(p, side) {
 }
 
 function moveAI(p, home, side) {
-  // Apply difficulty config only to AI opponents, teammates always use normal
-  const cfg = side === 'ai' ? DIFF[difficulty] : DIFF.normal;
   const onBall = side === 'player' ? ball.x < NX : ball.x > NX;
   const tx = onBall ? ball.x - PW / 2 : home;
-  if (Math.abs(p.x - tx) > 3) p.x += Math.sign(tx - p.x) * cfg.spd;
+  if (Math.abs(p.x - tx) > 3) p.x += Math.sign(tx - p.x) * 2.2;
   p.x = side === 'player' ? Math.max(0, Math.min(NX - PW - 5, p.x)) : Math.max(NX + 5, Math.min(800 - PW, p.x));
-  if (onBall && Math.abs(p.x - ball.x) < cfg.range && ball.y > p.y - cfg.range && p.g) {
-    p.vy = cfg.jumpVy; p.g = false;
-  }
+  if (onBall && Math.abs(p.x - ball.x) < 55 && ball.y > p.y - 55 && p.g) { p.vy = -12; p.g = false; }
   p.vy += 0.5; p.y += p.vy;
   if (p.y >= GND - PH) { p.y = GND - PH; p.vy = 0; p.g = true; }
   if (aabb(p, ball)) tryHit(p, side);
 }
 
 function update() {
+  // Particles and timers update regardless of game state
   particles = particles.filter(p => p.life > 0);
   particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.life--; });
   if (faultMsg && faultMsg.timer > 0) faultMsg.timer--;
@@ -209,19 +200,6 @@ function drawCharacter(p, color, isControlled) {
   }
 }
 
-// Draw difficulty indicator on the HUD during gameplay
-function drawDifficultyBadge() {
-  const labels = { easy: 'EASY', normal: 'NORMAL', hard: 'HARD' };
-  const colors  = { easy: '#00f5ff', normal: '#c8ff00', hard: '#ff2d78' };
-  ctx.save();
-  ctx.font = '7px "Press Start 2P", monospace';
-  ctx.textAlign = 'right';
-  ctx.fillStyle = colors[difficulty];
-  ctx.globalAlpha = 0.55;
-  ctx.fillText(labels[difficulty], 792, 16);
-  ctx.restore();
-}
-
 function draw() {
   ctx.fillStyle = '#0d0a1f'; ctx.fillRect(0, 0, 800, 450);
 
@@ -237,9 +215,9 @@ function draw() {
   ctx.fillStyle = '#c4914e'; ctx.fillRect(0, GND, 800, 60);
   ctx.fillStyle = '#d4a464'; ctx.fillRect(0, GND, 800, 8);
 
-  if (!ball || !player) { drawDifficultyBadge(); return; }
+  if (!ball || !player) return;
 
-  // Ball shadow
+  // Ball shadow — grows larger as ball nears ground
   const ballAbove = GND - ball.y;
   const shadowAlpha = Math.max(0, 0.45 - ballAbove / 320);
   const shadowScale = Math.max(0.25, 1 - ballAbove / 260);
@@ -258,7 +236,7 @@ function draw() {
   ctx.beginPath(); ctx.moveTo(NX, NT); ctx.lineTo(NX, GND); ctx.stroke();
   ctx.fillStyle = '#00f5ff'; ctx.fillRect(NX - 5, NT - 7, 10, 10);
 
-  // Characters
+  // Characters (player glows brighter)
   drawCharacter(player, '#00f5ff', true);
   tms.forEach(t => drawCharacter(t, '#0077dd', false));
   ais.forEach(a => drawCharacter(a, '#ff2d78', false));
@@ -307,7 +285,7 @@ function draw() {
     ctx.restore();
   }
 
-  // Fault message
+  // Fault message (floats upward and fades)
   if (faultMsg && faultMsg.timer > 0) {
     const alpha = Math.min(1, faultMsg.timer / 30);
     const rise = Math.max(0, (110 - faultMsg.timer) * 0.5);
@@ -322,7 +300,7 @@ function draw() {
     ctx.restore();
   }
 
-  // Point flash
+  // Point flash (team-side, brief)
   if (pointFlash && pointFlash.timer > 0) {
     const alpha = Math.min(1, pointFlash.timer / 18);
     ctx.save();
@@ -335,8 +313,6 @@ function draw() {
     ctx.fillText('POINT!', pointFlash.x, 225);
     ctx.restore();
   }
-
-  drawDifficultyBadge();
 }
 
 function loop() { update(); draw(); requestAnimationFrame(loop); }
@@ -347,31 +323,25 @@ document.addEventListener('keydown', e => {
 });
 document.addEventListener('keyup', e => { keys[e.code] = false; });
 
-document.querySelectorAll('.mode-btn:not(.diff-btn)').forEach(btn => btn.addEventListener('click', () => {
-  document.querySelectorAll('.mode-btn:not(.diff-btn)').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
+document.querySelectorAll('.mode-btn').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('.mode-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
   btn.classList.add('active'); btn.setAttribute('aria-pressed','true'); mode = +btn.dataset.points;
 }));
 
-document.querySelectorAll('.diff-btn').forEach(btn => btn.addEventListener('click', () => {
-  document.querySelectorAll('.diff-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
-  btn.classList.add('active'); btn.setAttribute('aria-pressed','true'); difficulty = btn.dataset.diff;
-}));
-
-function resetAndServe() {
+document.getElementById('serve-btn').addEventListener('click', () => {
+  document.getElementById('start-btn').style.display = 'none';
   ps = 0; as = 0; particles = []; faultMsg = null; pointFlash = null;
   document.getElementById('player-score').textContent = '0';
   document.getElementById('ai-score').textContent = '0';
   initServeReady('player');
-}
-
-document.getElementById('serve-btn').addEventListener('click', () => {
-  document.getElementById('start-btn').style.display = 'none';
-  resetAndServe();
 });
 
 document.getElementById('play-again-btn').addEventListener('click', () => {
   document.getElementById('game-over-screen').classList.add('hidden');
-  resetAndServe();
+  ps = 0; as = 0; particles = []; faultMsg = null; pointFlash = null;
+  document.getElementById('player-score').textContent = '0';
+  document.getElementById('ai-score').textContent = '0';
+  initServeReady('player');
 });
 
 ['btn-left','btn-right','btn-jump'].forEach(id => {

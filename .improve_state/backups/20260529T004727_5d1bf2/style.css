@@ -259,8 +259,8 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 28px 40px;
+  gap: 24px;
+  padding: 32px 40px;
   border: 2px solid var(--cyan);
   border-radius: var(--radius-md);
   background: var(--card-bg);
@@ -272,14 +272,6 @@ html, body {
 @keyframes card-in {
   from { opacity: 0; transform: scale(0.88) translateY(20px); }
   to   { opacity: 1; transform: scale(1)   translateY(0);     }
-}
-
-/* Section label for selectors */
-.selector-label {
-  font-size: 0.32rem;
-  color: rgba(255, 255, 255, 0.4);
-  letter-spacing: 0.18em;
-  margin-bottom: -8px;
 }
 
 /* Title Block */
@@ -321,7 +313,7 @@ html, body {
 /* Mode Selector */
 .mode-selector {
   display: flex;
-  gap: 8px;
+  gap: 12px;
 }
 
 .mode-btn {
@@ -363,20 +355,6 @@ html, body {
   outline: 2px solid var(--pink);
   outline-offset: 3px;
   box-shadow: var(--glow-pink);
-}
-
-/* Difficulty buttons use yellow accent */
-.diff-btn {
-  color: var(--yellow);
-  border-color: var(--yellow);
-  padding: 8px 12px;
-}
-
-.diff-btn:hover,
-.diff-btn.active {
-  background: var(--yellow);
-  color: var(--bg);
-  box-shadow: var(--glow-yellow);
 }
 
 /* Controls Hint */
@@ -626,17 +604,17 @@ kbd {
 /* ── Responsive Scaling ──────────────────────────────────── */
 @media (max-width: 520px) {
   .start-inner {
-    padding: 16px 14px;
-    gap: 12px;
+    padding: 20px 18px;
+    gap: 16px;
   }
 
   .mode-selector {
-    gap: 6px;
+    gap: 8px;
   }
 
   .mode-btn {
-    padding: 6px 10px;
-    font-size: 0.44rem;
+    padding: 6px 12px;
+    font-size: 0.48rem;
   }
 
   .gameover-card {

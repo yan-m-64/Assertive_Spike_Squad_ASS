@@ -1,8 +1,8 @@
 {
   "app_name": "Assertive_Spike_Squad_ASS",
-  "improvement_id": "20260528T152055_153165",
+  "improvement_id": "20260530T013825_203bfa",
   "status": "complete",
-  "improvement_request": "Improve gameplay clarity, make the app clearly winnable/playable, improve feedback, and preserve existing working behavior.",
+  "improvement_request": "1. You should be able to also select the difficulty, higher difficulty means opponents loses less points.\n2. There should be actual little voleyvall characters models.\n3. You should be able to select different maps. \n4. You should be able to jump and then 2 separate buttons to receive the ball and another to spike the ball",
   "current_stage": "browser",
   "completed_stages": [
     "analyze",
@@ -15,18 +15,19 @@
     "browser"
   ],
   "files_changed": [
-    "app.js",
-    "style.css"
+    "index.html",
+    "style.css",
+    "app.js"
   ],
   "partial_files": [],
   "backup_files": [
-    "/Users/agent/claude-agents/projects/Assertive_Spike_Squad_ASS/.improve_state/backups/20260528T152055_153165/index.html",
-    "/Users/agent/claude-agents/projects/Assertive_Spike_Squad_ASS/.improve_state/backups/20260528T152055_153165/style.css",
-    "/Users/agent/claude-agents/projects/Assertive_Spike_Squad_ASS/.improve_state/backups/20260528T152055_153165/app.js",
-    "/Users/agent/claude-agents/projects/Assertive_Spike_Squad_ASS/.improve_state/backups/20260528T152055_153165/README.md"
+    "/Users/agent/claude-agents/projects/Assertive_Spike_Squad_ASS/.improve_state/backups/20260530T013825_203bfa/index.html",
+    "/Users/agent/claude-agents/projects/Assertive_Spike_Squad_ASS/.improve_state/backups/20260530T013825_203bfa/style.css",
+    "/Users/agent/claude-agents/projects/Assertive_Spike_Squad_ASS/.improve_state/backups/20260530T013825_203bfa/app.js",
+    "/Users/agent/claude-agents/projects/Assertive_Spike_Squad_ASS/.improve_state/backups/20260530T013825_203bfa/README.md"
   ],
   "retry_count_by_stage": {},
   "last_error": null,
-  "last_updated": "2026-05-28T15:28:19Z",
+  "last_updated": "2026-05-30T01:41:58Z",
   "can_resume": true
 }
