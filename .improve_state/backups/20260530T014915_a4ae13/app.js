@@ -4,8 +4,7 @@ canvas.width = 800; canvas.height = 450;
 
 const GND = 390, NX = 400, NT = 268, BR = 12, PW = 28, PH = 46;
 let state = 'idle', mode = 14, difficulty = 'normal', ps = 0, as = 0, keys = {};
-let ball, player, tms, ais, rally;
-let prevContacts = {}; // tracks which players were in contact last frame for edge detection
+let ball, player, tms, ais, rally, hitLock;
 let serveTeam = 'player', serveTimer = 0;
 let faultMsg = null, pointFlash = null;
 let particles = [];
@@ -25,7 +24,7 @@ function initServeReady(srv) {
   state = 'serve-ready';
   keys.Space = false; keys.ArrowUp = false; keys.KeyW = false;
   rally = { hits: 0, last: null, side: srv };
-  prevContacts = {};
+  hitLock = 0;
   player = mkP(160, 'p');
   tms = [mkP(60, 't1'), mkP(240, 't2'), mkP(330, 't3')];
   ais = [mkP(490, 'a1'), mkP(570, 'a2'), mkP(660, 'a3'), mkP(730, 'a4')];
@@ -118,8 +117,9 @@ function spawnHitParticles(x, y, side) {
 }
 
 function tryHit(p, side) {
-  // Only allow hits from the side that currently has the ball
-  if ((ball.x < NX ? 'player' : 'ai') !== side) return;
+  // hitLock is a frame-count cooldown — prevents the same ball contact lingering
+  // across consecutive frames from being counted as separate hits
+  if (hitLock > 0 || (ball.x < NX ? 'player' : 'ai') !== side) return;
   if (rally.last === p.id) {
     point(side === 'player' ? 'ai' : 'player', 'DOUBLE HIT!');
     return;
@@ -128,19 +128,11 @@ function tryHit(p, side) {
     point(side === 'player' ? 'ai' : 'player', '4TH HIT FAULT!');
     return;
   }
-  rally.hits++; rally.last = p.id;
+  rally.hits++; rally.last = p.id; hitLock = 14;
   ball.vx = (side === 'player' ? 1 : -1) * (4 + Math.random() * 4);
   ball.vy = -11 - Math.random() * 3;
   spawnHitParticles(ball.x, ball.y, side);
   updateDots();
-}
-
-// Edge-triggered contact check — fires tryHit only on the first frame of contact,
-// not on every overlapping frame. Prevents sustained overlap from being miscounted.
-function checkContact(p, side) {
-  const inContact = aabb(p, ball);
-  if (inContact && !prevContacts[p.id]) tryHit(p, side);
-  prevContacts[p.id] = inContact;
 }
 
 function moveAI(p, home, side) {
@@ -155,7 +147,7 @@ function moveAI(p, home, side) {
   }
   p.vy += 0.5; p.y += p.vy;
   if (p.y >= GND - PH) { p.y = GND - PH; p.vy = 0; p.g = true; }
-  checkContact(p, side);
+  if (aabb(p, ball)) tryHit(p, side);
 }
 
 function update() {
@@ -177,12 +169,16 @@ function update() {
 
   if (state !== 'playing') return;
 
+  // Decrement hit cooldown each frame rather than resetting to false —
+  // prevents ball contact lingering across frames from triggering false double-hits
+  if (hitLock > 0) hitLock--;
+
   if (keys.ArrowLeft || keys.KeyA) player.x = Math.max(0, player.x - 3.5);
   if (keys.ArrowRight || keys.KeyD) player.x = Math.min(NX - PW - 5, player.x + 3.5);
   if ((keys.Space || keys.ArrowUp || keys.KeyW) && player.g) { player.vy = -13; player.g = false; }
   player.vy += 0.5; player.y += player.vy;
   if (player.y >= GND - PH) { player.y = GND - PH; player.vy = 0; player.g = true; }
-  checkContact(player, 'player');
+  if (aabb(player, ball)) tryHit(player, 'player');
   tms.forEach((t, i) => moveAI(t, [60, 240, 330][i], 'player'));
   ais.forEach((a, i) => moveAI(a, [490, 570, 660, 730][i], 'ai'));
   ball.vy += 0.42; ball.x += ball.vx; ball.y += ball.vy; ball.vx *= 0.999;
@@ -196,7 +192,7 @@ function update() {
   const ns = ball.x < NX ? 'player' : 'ai';
   if (ns !== rally.side) {
     rally.side = ns; rally.hits = 0; rally.last = null;
-    prevContacts = {}; // reset contact states so receiving team can hit immediately
+    hitLock = 0; // clear cooldown on side change so new team can hit immediately
     updateDots(); updateHitLabel();
   }
 }
