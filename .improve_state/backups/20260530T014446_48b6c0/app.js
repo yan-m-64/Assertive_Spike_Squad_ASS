@@ -24,7 +24,6 @@ function initServeReady(srv) {
   state = 'serve-ready';
   keys.Space = false; keys.ArrowUp = false; keys.KeyW = false;
   rally = { hits: 0, last: null, side: srv };
-  hitLock = 0;
   player = mkP(160, 'p');
   tms = [mkP(60, 't1'), mkP(240, 't2'), mkP(330, 't3')];
   ais = [mkP(490, 'a1'), mkP(570, 'a2'), mkP(660, 'a3'), mkP(730, 'a4')];
@@ -117,9 +116,7 @@ function spawnHitParticles(x, y, side) {
 }
 
 function tryHit(p, side) {
-  // hitLock is a frame-count cooldown — prevents the same ball contact lingering
-  // across consecutive frames from being counted as separate hits
-  if (hitLock > 0 || (ball.x < NX ? 'player' : 'ai') !== side) return;
+  if (hitLock || (ball.x < NX ? 'player' : 'ai') !== side) return;
   if (rally.last === p.id) {
     point(side === 'player' ? 'ai' : 'player', 'DOUBLE HIT!');
     return;
@@ -128,7 +125,7 @@ function tryHit(p, side) {
     point(side === 'player' ? 'ai' : 'player', '4TH HIT FAULT!');
     return;
   }
-  rally.hits++; rally.last = p.id; hitLock = 14;
+  rally.hits++; rally.last = p.id; hitLock = true;
   ball.vx = (side === 'player' ? 1 : -1) * (4 + Math.random() * 4);
   ball.vy = -11 - Math.random() * 3;
   spawnHitParticles(ball.x, ball.y, side);
@@ -168,11 +165,7 @@ function update() {
   }
 
   if (state !== 'playing') return;
-
-  // Decrement hit cooldown each frame rather than resetting to false —
-  // prevents ball contact lingering across frames from triggering false double-hits
-  if (hitLock > 0) hitLock--;
-
+  hitLock = false;
   if (keys.ArrowLeft || keys.KeyA) player.x = Math.max(0, player.x - 3.5);
   if (keys.ArrowRight || keys.KeyD) player.x = Math.min(NX - PW - 5, player.x + 3.5);
   if ((keys.Space || keys.ArrowUp || keys.KeyW) && player.g) { player.vy = -13; player.g = false; }
@@ -190,11 +183,7 @@ function update() {
   if (ball.x - BR < 0) { ball.x = BR; ball.vx = Math.abs(ball.vx) * 0.8; }
   if (ball.x + BR > 800) { ball.x = 800 - BR; ball.vx = -Math.abs(ball.vx) * 0.8; }
   const ns = ball.x < NX ? 'player' : 'ai';
-  if (ns !== rally.side) {
-    rally.side = ns; rally.hits = 0; rally.last = null;
-    hitLock = 0; // clear cooldown on side change so new team can hit immediately
-    updateDots(); updateHitLabel();
-  }
+  if (ns !== rally.side) { rally.side = ns; rally.hits = 0; rally.last = null; updateDots(); updateHitLabel(); }
 }
 
 function drawCharacter(p, color, isControlled) {
