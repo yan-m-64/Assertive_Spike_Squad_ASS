@@ -5,11 +5,12 @@ canvas.width = 800; canvas.height = 450;
 const GND = 390, NX = 400, NT = 268, BR = 12, PW = 28, PH = 46;
 let state = 'idle', mode = 14, difficulty = 'normal', ps = 0, as = 0, keys = {};
 let ball, player, tms, ais, rally;
-let prevContacts = {};
+let prevContacts = {}; // tracks which players were in contact last frame for edge detection
 let serveTeam = 'player', serveTimer = 0;
 let faultMsg = null, pointFlash = null;
 let particles = [];
 
+// AI tuning per difficulty — higher difficulty = faster, more reactive opponents
 const DIFF = {
   easy:   { spd: 1.4, range: 35, jumpVy: -11 },
   normal: { spd: 2.2, range: 55, jumpVy: -12 },
@@ -117,6 +118,7 @@ function spawnHitParticles(x, y, side) {
 }
 
 function tryHit(p, side) {
+  // Only allow hits from the side that currently has the ball
   if ((ball.x < NX ? 'player' : 'ai') !== side) return;
   if (rally.last === p.id) {
     point(side === 'player' ? 'ai' : 'player', 'DOUBLE HIT!');
@@ -133,6 +135,8 @@ function tryHit(p, side) {
   updateDots();
 }
 
+// Edge-triggered contact check — fires tryHit only on the first frame of contact,
+// not on every overlapping frame. Prevents sustained overlap from being miscounted.
 function checkContact(p, side) {
   const inContact = aabb(p, ball);
   if (inContact && !prevContacts[p.id]) tryHit(p, side);
@@ -140,6 +144,7 @@ function checkContact(p, side) {
 }
 
 function moveAI(p, home, side) {
+  // Apply difficulty config only to AI opponents, teammates always use normal
   const cfg = side === 'ai' ? DIFF[difficulty] : DIFF.normal;
   const onBall = side === 'player' ? ball.x < NX : ball.x > NX;
   const tx = onBall ? ball.x - PW / 2 : home;
@@ -191,7 +196,7 @@ function update() {
   const ns = ball.x < NX ? 'player' : 'ai';
   if (ns !== rally.side) {
     rally.side = ns; rally.hits = 0; rally.last = null;
-    prevContacts = {};
+    prevContacts = {}; // reset contact states so receiving team can hit immediately
     updateDots(); updateHitLabel();
   }
 }
@@ -219,6 +224,7 @@ function drawCharacter(p, color, isControlled) {
   }
 }
 
+// Draw difficulty indicator on the HUD during gameplay
 function drawDifficultyBadge() {
   const labels = { easy: 'EASY', normal: 'NORMAL', hard: 'HARD' };
   const colors  = { easy: '#00f5ff', normal: '#c8ff00', hard: '#ff2d78' };
@@ -297,24 +303,20 @@ function draw() {
   if (state === 'serve-ready') {
     const pulse = 0.6 + 0.4 * Math.sin(Date.now() / 290);
     ctx.save();
+    ctx.font = '9px "Press Start 2P", monospace';
     ctx.textAlign = 'center';
     if (serveTeam === 'player') {
+      ctx.globalAlpha = pulse;
       ctx.fillStyle = '#c8ff00';
       ctx.shadowColor = '#c8ff00';
-      ctx.shadowBlur = 18;
-      ctx.globalAlpha = pulse;
-      ctx.font = '13px "Press Start 2P", monospace';
-      ctx.fillText('PRESS SPACE TO SERVE', 200, GND - 100);
-      ctx.globalAlpha = pulse * 0.75;
-      ctx.font = '7px "Press Start 2P", monospace';
-      ctx.fillText('JUMP INTO BALL TO HIT', 200, GND - 78);
+      ctx.shadowBlur = 14;
+      ctx.fillText('▲  PRESS SPACE TO SERVE', 200, GND - 78);
     } else {
       const aiPulse = 0.5 + 0.3 * Math.sin(Date.now() / 400);
       ctx.globalAlpha = aiPulse;
       ctx.fillStyle = '#ff2d78';
       ctx.shadowColor = '#ff2d78';
       ctx.shadowBlur = 10;
-      ctx.font = '13px "Press Start 2P", monospace';
       ctx.fillText('AI SERVING...', 600, GND - 78);
     }
     ctx.restore();
@@ -374,7 +376,6 @@ function resetAndServe() {
   ps = 0; as = 0; particles = []; faultMsg = null; pointFlash = null;
   document.getElementById('player-score').textContent = '0';
   document.getElementById('ai-score').textContent = '0';
-  document.getElementById('set-info').textContent = 'FIRST TO ' + mode;
   initServeReady('player');
 }
 
